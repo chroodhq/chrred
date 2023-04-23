@@ -1,4 +1,4 @@
-INIT_COMMAND_OPTIONS ?= -backend-config="bucket=$(TF_STATE_BUCKET)" -backend-config="key=$(TF_VAR_stack_name)/$(TF_VAR_environment)/terraform.tfstate" -backend-config="dynamodb_table=$(TF_STATE_LOCK_TABLE)"
+INIT_COMMAND_OPTIONS ?=
 COMMAND_OPTIONS ?= -reconfigure
 
 fmt:
