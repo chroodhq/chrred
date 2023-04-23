@@ -7,5 +7,4 @@ resource "aws_dynamodb_table" "matching_table" {
     name = "url_key"
     type = "S"
   }
-  deletion_protection_enabled = true
 }
