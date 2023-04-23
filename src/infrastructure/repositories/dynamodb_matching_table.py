@@ -24,7 +24,7 @@ class DynamoDBMatchingTableRepository:
         try:
             response = self.client.query(
                 TableName=self.table_name,
-                KeyConditionExpression="key = :source_url",
+                KeyConditionExpression="_key = :source_url",
                 ExpressionAttributeValues={":source_url": {"S": key}},
             )
             url = self.convert_dynamodb_item_to_url(response["Items"][0])
@@ -37,7 +37,7 @@ class DynamoDBMatchingTableRepository:
     def convert_url_to_dynamodb_item(url: URL) -> dict:
         return {
             "id": {"S": url.id},
-            "key": {"S": url.key},
+            "_key": {"S": url.key},
             "secret_key": {"S": url.secret_key},
             "target_url": {"S": url.target_url},
             "is_active": {"BOOL": url.is_active},
@@ -48,7 +48,7 @@ class DynamoDBMatchingTableRepository:
     def convert_dynamodb_item_to_url(item: dict) -> URL:
         return URL(
             id=item["id"]["S"],
-            key=item["key"]["S"],
+            key=item["_key"]["S"],
             secret_key=item["secret_key"]["S"],
             target_url=item["target_url"]["S"],
             is_active=item["is_active"]["BOOL"],
