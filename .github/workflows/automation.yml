@@ -1,0 +1,209 @@
+name: Integration Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Deploy changes
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_stack_name: chrred-link-shortener
+      TF_VAR_allowed_account_id: ${{ secrets.AWS_ALLOWED_ACCOUNT_ID }}
+      TF_VAR_source_repository_url: https://github.com/chroodhq/chrred
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ORGANIZATION }}
+      POETRY_VERSION: 1.2.2
+
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Set environment specific variables
+        run: |
+          if [[ ${{github.event_name}} == 'workflow_dispatch' ]]; then
+            echo "TF_VAR_environment=live" >> "$GITHUB_ENV"
+          else
+            echo "TF_VAR_environment=test" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.OIDC_ROLE_TO_ASSUME }}
+          aws-region: 'eu-central-1'
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ~> 1.4.0
+
+      - name: Set up Python 3.9.15
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.15
+
+      - name: Load Poetry ${{ env.POETRY_VERSION }} cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: poetry-${{ env.POETRY_VERSION }}
+
+      - name: Install Poetry ${{ env.POETRY_VERSION }}
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
+            venv-${{ runner.os }}-
+            venv-
+
+      - name: Install dependencies
+        id: install
+        run: make install
+
+      # - name: Run unit tests
+      #   id: unittests
+      #   run: make unit-tests
+
+      - name: Lint project
+        id: lint
+        run: make lint
+
+      - name: Generate requirements.txt
+        run: poetry export -o requirements.txt
+
+      - name: Generate wheels in dist folder
+        run: poetry build
+
+      - name: Prepare target folder
+        run: |
+          mkdir target
+          cd target
+          mv ../dist .
+
+      - name: Build AWS Lambda bundle
+        run: poetry run pip install --upgrade -t target/package target/dist/*.whl
+
+      - name: Move package
+        run: |
+          mv target/package terraform/package
+
+      - name: Terraform Format
+        working-directory: ./terraform
+        id: fmt
+        env:
+          COMMAND_OPTIONS: -check -recursive
+        run: make fmt
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        id: init
+        env:
+          INIT_COMMAND_OPTIONS: -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=${{ env.TF_VAR_stack_name }}/${{ env.TF_VAR_environment }}/terraform.tfstate" -backend-config="dynamodb_table=${{ secrets.TF_STATE_LOCK_TABLE }}"
+        run: make init
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        id: validate
+        env:
+          COMMAND_OPTIONS: -no-color
+        run: make validate
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        timeout-minutes: 5
+        id: plan
+        if: github.event_name == 'pull_request'
+        env:
+          COMMAND_OPTIONS: -no-color
+        run: make plan
+        continue-on-error: true
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+            })
+
+            // 2. Prepare format of the comment
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            
+            <details><summary>Validation Output</summary>
+            
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+            
+            </details>
+            
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          COMMAND_OPTIONS: -auto-approve -no-color
+        run: make apply
