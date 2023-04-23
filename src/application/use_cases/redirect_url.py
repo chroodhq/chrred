@@ -9,6 +9,8 @@ class RedirectURLUseCase:
     def run(self, key: str) -> URL:
         try:
             url = self.repository.get_item(key)
+            url.clicks += 1
+            self.repository.update_item(url)
         except Exception as e:
             raise e
         else:

@@ -47,7 +47,7 @@ def redirect(key: str) -> Response:
         use_case = RedirectURLUseCase()
         response = use_case.run(key)
     except Exception as e:
-        return Response(body=str(e), status_code=500)
+        return Response(body=str(e), status_code=404)
     else:
         return Response(
             status_code=301,

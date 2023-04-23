@@ -33,6 +33,22 @@ class DynamoDBMatchingTableRepository:
         else:
             return url
 
+    def update_item(self, url: URL) -> dict:
+        try:
+            response = self.client.update_item(
+                TableName=self.table_name,
+                Key={"url_key": {"S": url.key}},
+                UpdateExpression="SET clicks = :clicks, is_active = :is_active",
+                ExpressionAttributeValues={
+                    ":clicks": {"N": str(url.clicks)},
+                    ":is_active": {"BOOL": url.is_active},
+                },
+            )
+        except Exception as e:
+            raise e
+        else:
+            return response
+
     @staticmethod
     def convert_url_to_dynamodb_item(url: URL) -> dict:
         return {
