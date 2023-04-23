@@ -28,6 +28,7 @@ resource "aws_lambda_function" "monolith" {
       LOG_LEVEL                    = "DEBUG"
       ENVIRONMENT                  = var.environment
       MATCHING_TABLE_DB_TABLE_NAME = aws_dynamodb_table.matching_table.name
+      BASE_URL                     = local.domain
     }
   }
 }
