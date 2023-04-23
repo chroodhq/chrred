@@ -39,6 +39,15 @@ def create_url() -> Response:
         return Response(body=json.dumps(response.__dict__), status_code=200)
 
 
+@app.get("/<url>")
+@tracer.capture_method
+def redirect(url: str) -> Response:
+    return Response(
+        status_code=301,
+        headers={"Location": "https://github.com"},
+    )
+
+
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
