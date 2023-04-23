@@ -151,3 +151,9 @@ resource "aws_api_gateway_domain_name" "stack_root_domain" {
   certificate_arn = aws_acm_certificate_validation.public_domain.certificate_arn
   domain_name     = local.domain
 }
+
+resource "aws_api_gateway_base_path_mapping" "stack_root_domain" {
+  api_id      = aws_api_gateway_rest_api.monolith.id
+  stage_name  = aws_api_gateway_stage.monolith.stage_name
+  domain_name = aws_api_gateway_domain_name.stack_root_domain.domain_name
+}
