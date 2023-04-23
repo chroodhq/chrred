@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "matching_table" {
-  name         = "${local.resource_prefix}-matching-table"
+  name         = "${local.resource_prefix}-link-matching"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "url_key"
 
