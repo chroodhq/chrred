@@ -11,9 +11,6 @@ class URL(URLBase):
     is_active: bool
     clicks: int
 
-    class Config:
-        orm_mode = True
-
 
 @dataclass
 class URLInfo(URL):

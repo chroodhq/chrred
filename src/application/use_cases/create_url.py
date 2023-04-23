@@ -25,4 +25,10 @@ class CreateURLUseCase:
         except Exception as e:
             raise e
         else:
-            return URLInfo(**url.__dict__)
+            return URLInfo(
+                target_url=url.target_url,
+                is_active=url.is_active,
+                clicks=url.clicks,
+                url=url.key,
+                admin_url=url.secret_key,
+            )
