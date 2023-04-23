@@ -8,6 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from src.domain import schemas
 from src.application.use_cases.create_url import CreateURLUseCase
+from src.application.use_cases.redirect_url import RedirectURLUseCase
 
 
 tracer = Tracer()
@@ -39,13 +40,19 @@ def create_url() -> Response:
         return Response(body=json.dumps(response.__dict__), status_code=200)
 
 
-@app.get("/<url>")
+@app.get("/<key>")
 @tracer.capture_method
-def redirect(url: str) -> Response:
-    return Response(
-        status_code=301,
-        headers={"Location": "https://github.com"},
-    )
+def redirect(key: str) -> Response:
+    try:
+        use_case = RedirectURLUseCase()
+        response = use_case.run(key)
+    except Exception as e:
+        return Response(body=str(e), status_code=500)
+    else:
+        return Response(
+            status_code=301,
+            headers={"Location": response.target_url},
+        )
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)

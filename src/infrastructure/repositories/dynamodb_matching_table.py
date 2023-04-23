@@ -19,6 +19,19 @@ class DynamoDBMatchingTableRepository:
             raise e
         else:
             return response
+    
+    def get_item(self, key: str) -> URL:
+        try:
+            response = self.client.query(
+                TableName=self.table_name,
+                KeyConditionExpression="key = :key",
+                ExpressionAttributeValues={":key": {"S": key}}
+            )
+            url = self.convert_dynamodb_item_to_url(response["Items"][0])
+        except Exception as e:
+            raise e
+        else:
+            return url
 
     @staticmethod
     def convert_url_to_dynamodb_item(url: URL) -> dict:
