@@ -37,7 +37,7 @@ class DynamoDBMatchingTableRepository:
     def convert_url_to_dynamodb_item(url: URL) -> dict:
         return {
             "id": {"S": url.id},
-            "_keurl_keyy": {"S": url.key},
+            "url_key": {"S": url.key},
             "secret_key": {"S": url.secret_key},
             "target_url": {"S": url.target_url},
             "is_active": {"BOOL": url.is_active},
