@@ -28,6 +28,7 @@ data "aws_iam_policy_document" "lambda_permissions" {
     actions = [
       "dynamodb:PutItem",
       "dynamodb:Query",
+      "dynamodb:UpdateItem"
     ]
     resources = ["*"]
   }
