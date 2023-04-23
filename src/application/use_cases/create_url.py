@@ -25,4 +25,4 @@ class CreateURLUseCase:
         except Exception as e:
             raise e
         else:
-            info = URLInfo(**url.__dict__)
+            return URLInfo(**url.__dict__)
