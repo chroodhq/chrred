@@ -95,7 +95,7 @@ jobs:
 
   deploy_live:
     needs: deploy_test
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     uses: chroodhq/.github/.github/workflows/reusable-deployment.yml@main
     with:
