@@ -85,7 +85,6 @@ jobs:
     with:
       environment: test
       stack_name: chrred-link-shortener
-      source_repository_name: chrred
     secrets: inherit
 
     permissions:
@@ -101,7 +100,6 @@ jobs:
     with:
       environment: live
       stack_name: chrred-link-shortener
-      source_repository_name: chrred
     secrets: inherit
 
     permissions:
