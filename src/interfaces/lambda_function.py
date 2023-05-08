@@ -18,7 +18,7 @@ cors_config = CORSConfig(allow_origin="*")
 app = APIGatewayRestResolver(cors=cors_config)
 
 
-@app.get("/health")
+@app.get("/health", cors=False)
 @tracer.capture_method
 def welcome() -> Response:
     return Response(
@@ -26,7 +26,7 @@ def welcome() -> Response:
     )
 
 
-@app.post("/url")
+@app.post("/url", cors=False)
 @tracer.capture_method
 def create_url() -> Response:
     body = json.loads(str(app.current_event.body))
