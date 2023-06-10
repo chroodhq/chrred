@@ -12,7 +12,7 @@ resource "aws_lambda_function" "monolith" {
   function_name    = "${local.resource_prefix}-monolith"
   role             = aws_iam_role.lambda.arn
   handler          = "src/interfaces/lambda_function.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.10"
   timeout          = 5
   memory_size      = 128
   architectures    = ["arm64"]
