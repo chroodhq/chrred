@@ -72,12 +72,13 @@ jobs:
           poetry run pip install --upgrade -t target/package target/dist/*.whl
           mv target/package terraform/package
 
-      - name: Cache lambda package
-        id: cached-lambda-package
-        uses: actions/cache/save@v3
+      - name: Upload lambda package
+        id: upload-lambda-package
+        uses: actions/upload-artifact@v3
         with:
+          name: lambda-package
           path: terraform/package
-          key: lambda-package-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          retention-days: 1
   
   deploy_test:
     needs: build
