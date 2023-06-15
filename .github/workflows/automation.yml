@@ -70,14 +70,14 @@ jobs:
       - name: Build AWS Lambda bundle
         run: | 
           poetry run pip install --upgrade -t target/package target/dist/*.whl
-          mv target/package terraform/package
+          zip -r target/package.zip target/package
 
       - name: Upload lambda package
         id: upload-lambda-package
         uses: actions/upload-artifact@v3
         with:
           name: lambda-package
-          path: terraform/package
+          path: target/package.zip
           retention-days: 1
   
   deploy_test:
