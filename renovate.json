@@ -2,13 +2,24 @@
     "extends": [
       "config:base"
     ],
+    "assignees": [
+      "colintessarzick"
+    ],
     "packageRules": [
       {
-        "updateTypes": [
+        "matchUpdateTypes": [
           "minor",
           "patch"
         ],
         "automerge": true
+      },
+      {
+        "excludeDepNames": [
+          "boto3"
+        ],
+        "matchUpdateTypes": [
+          "patch"
+        ]
       }
     ],
     "timezone": "Europe/Berlin",
