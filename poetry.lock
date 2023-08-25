@@ -2,14 +2,14 @@
 
 [[package]]
 name = "aws-lambda-powertools"
-version = "2.23.0"
+version = "2.23.1"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 category = "main"
 optional = false
 python-versions = ">=3.7.4,<4.0.0"
 files = [
-    {file = "aws_lambda_powertools-2.23.0-py3-none-any.whl", hash = "sha256:a7a2a6aefbbc360ffd234ec903017a46680fd8e06e1ce745f90999fa334c2253"},
-    {file = "aws_lambda_powertools-2.23.0.tar.gz", hash = "sha256:3942014d610cd9780904f253e8f7aaeb30ae81f9fbb95c253cbaa4837955fe20"},
+    {file = "aws_lambda_powertools-2.23.1-py3-none-any.whl", hash = "sha256:daa42b1060bc42bf473c984257345bef17e5bded18ec1d6680ce97ca25c1dfbb"},
+    {file = "aws_lambda_powertools-2.23.1.tar.gz", hash = "sha256:1dc08eddd04520cb400085c13db162cf84020d4803192d88c0d2742d77ce3758"},
 ]
 
 [package.dependencies]
@@ -18,6 +18,7 @@ typing-extensions = ">=4.6.2,<5.0.0"
 [package.extras]
 all = ["aws-xray-sdk (>=2.8.0,<3.0.0)", "fastjsonschema (>=2.14.5,<3.0.0)", "pydantic (>=1.8.2,<2.0.0)"]
 aws-sdk = ["boto3 (>=1.20.32,<2.0.0)"]
+datadog = ["datadog-lambda (>=4.77.0,<5.0.0)"]
 parser = ["pydantic (>=1.8.2,<2.0.0)"]
 tracer = ["aws-xray-sdk (>=2.8.0,<3.0.0)"]
 validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
