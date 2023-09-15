@@ -71,6 +71,7 @@ jobs:
         run: | 
           poetry run pip install --upgrade -t target/package target/dist/*.whl
           zip -r target/package.zip target/package
+          echo "is ok"
 
       - name: Upload lambda package
         id: upload-lambda-package
