@@ -90,7 +90,6 @@ jobs:
       stack_name: chrred-link-shortener
       lambda_package_artifact_exists: true
       lambda_package_zip_name: package.zip
-      lambda_package_binary_name: package
     secrets: inherit
 
     permissions:
