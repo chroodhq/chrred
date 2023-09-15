@@ -70,7 +70,6 @@ jobs:
       - name: Build AWS Lambda bundle
         run: | 
           poetry run pip install --upgrade -t target/package target/dist/*.whl
-          cd ..
           zip -r target/package.zip target/package
 
       - name: Upload lambda package
