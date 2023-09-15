@@ -88,6 +88,8 @@ jobs:
       environment: test
       stack_name: chrred-link-shortener
       lambda_package_artifact_exists: true
+      lambda_package_zip_name: target/package.zip
+      lambda_package_binary_name: target/package
     secrets: inherit
 
     permissions:
@@ -104,6 +106,8 @@ jobs:
       environment: live
       stack_name: chrred-link-shortener
       lambda_package_artifact_exists: true
+      lambda_package_zip_name: target/package.zip
+      lambda_package_binary_name: target/package
     secrets: inherit
 
     permissions:
