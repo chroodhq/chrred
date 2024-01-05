@@ -16,7 +16,7 @@ validators = "^0.22.0"
 
 [tool.poetry.group.dev.dependencies]
 boto3 = "^1.26.114"
-flake8 = "^6.0.0"
+flake8 = "^7.0.0"
 black = "^23.3.0"
 mypy = "^1.2.0"
 pytest = "^7.3.1"
